@@ -1,10 +1,10 @@
-# Refactor del pipeline — cómo usarlo
+# Refactor del pipeline — Cómo usarlo
 
 ## Estructura tras el refactor
 
 ```
 Test 2/
-├── config.yaml          ← TODOS los parámetros (cámbialos aquí)
+├── config.yaml          ← TODOS los parámetros
 ├── main.py              ← orquestador único
 ├── pipeline/            ← módulos de cada fase
 │   ├── __init__.py
@@ -32,25 +32,17 @@ Test 2/
 
 ## Cómo ejecutar
 
-**Abres CMD o Anaconda Prompt** (NO Spyder) en la carpeta del proyecto y escribes:
+**Abrir la terminal** en la carpeta del proyecto y escribir:
 
-```cmd
-cd "C:\Users\danie\OneDrive\Documentos\Proyectos de Python\Test 2"
-python main.py fase1
 ```
-
-**Si prefieres ejecutar desde Spyder:**
-Abre `main.py`, y al final del archivo (antes de `if __name__ == "__main__"`) añade temporalmente:
-```python
-sys.argv = ["main.py", "fase1"]   # o la fase que quieras
+python main.py all
 ```
-Luego ejecútalo normalmente con Play.
 
 ## Comandos disponibles
 
 | comando | qué hace |
 |---|---|
-| `python main.py prep` | Solo preparación |
+| `python main.py prep`  | Solo preparación |
 | `python main.py fase1` | Todo XGBoost (prep → baseline → tune → eval → top) |
 | `python main.py fase2` | Todo GraphSAGE |
 | `python main.py fase3` | Todo híbrido |
@@ -61,11 +53,11 @@ Luego ejecútalo normalmente con Play.
 ## Cómo cambiar un parámetro
 
 **Ejemplo 1: probar con semilla 42 en vez de 2025.**
-Abres `config.yaml`, cambias:
+Abrir `config.yaml` y cambiar:
 ```yaml
 seed: 42
 ```
-Lanzas: `python main.py all`. Fin.
+Lanzar: `python main.py all`.
 
 **Ejemplo 2: probar GraphSAGE con 128 dims en vez de 64.**
 En `config.yaml`:
@@ -73,7 +65,7 @@ En `config.yaml`:
 graph:
   hidden_dim: 128
 ```
-Lanzas solo lo afectado:
+Lanzar solo lo afectado:
 ```cmd
 python main.py graph_train
 python main.py graph_eval
@@ -90,14 +82,3 @@ xgb_tune:
 hybrid:
   xgb_tune_trials: 100
 ```
-
-## Ventaja para la memoria
-
-En el apéndice puedes pegar el `config.yaml` completo y decir:
-
-> *"La configuración experimental completa está documentada en el fichero
-> `config.yaml`. La ejecución del pipeline de principio a fin se realiza con
-> el comando `python main.py all`, garantizando reproducibilidad total."*
-
-Esto satisface directamente el principio de trazabilidad que exige EIOPA
-para modelos de alto impacto en el sector asegurador.
