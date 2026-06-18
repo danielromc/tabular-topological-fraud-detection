@@ -1,0 +1,29 @@
+# Python cache and virtual environments
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Runtime logs and checkpoints
+*.log
+
+# Generated model artifacts and experiment outputs
+artifacts/
+artifacts_graph/
+artifacts_hybrid/
+artifacts_comparison/
+
+# Generated visual outputs
+*.html
+*.pdf
+
+# Keep source data policy explicit: uncomment if you do NOT want to version raw data
+# claims.csv
+# edges.csv
+# providers.csv

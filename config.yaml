@@ -1,0 +1,88 @@
+# ======================================================================
+# config.yaml — Configuración centralizada del pipeline de detección
+# de fraude en seguros (XGBoost + GraphSAGE + Híbrido)
+#
+# Cambia cualquier valor aquí y relanza la fase afectada:
+#   python main.py <fase>
+# ======================================================================
+
+# Semilla global (reproducibilidad)
+seed: 2025
+
+# Rutas de entrada/salida
+paths:
+  claims_csv:      "claims.csv"
+  providers_csv:   "providers.csv"
+  edges_csv:       "edges.csv"
+  artifacts:       "./artifacts"
+  artifacts_graph: "./artifacts_graph"
+  artifacts_hybrid: "./artifacts_hybrid"
+  artifacts_cmp:   "./artifacts_comparison"
+
+# ---------------------------------------------------------------------
+# FASE 1 — XGBoost tabular
+# ---------------------------------------------------------------------
+prep:
+  test_size: 0.30    # 70/30 primer split
+  val_fraction_of_test: 0.50   # luego 50/50 para 15/15
+  # Columnas descartadas por leak directo (nunca tocar)
+  leak_cols:
+    - Cost_claims_year_original
+    - Fraud_type
+    - Ring_ID
+    - cost_rank
+    - behav_score
+    - z_score_type   # mu/sd se calculan filtrando por !is_fraud → la etiqueta entra en la feature
+  # Columnas descartadas por contaminación relacional (ver sección 4 memoria)
+  contaminated_relational:
+    - Workshop_total_claims
+    - Workshop_avg_cost
+    - Clinic_total_claims
+    - Clinic_avg_cost
+    - Lawyer_total_claims
+    - Lawyer_avg_cost
+    - Event_participants_count
+
+xgb_baseline:
+  n_estimators: 1000
+  early_stopping_rounds: 50
+
+xgb_tune:
+  n_trials: 50
+  n_estimators_max: 2000
+  early_stopping_rounds: 50
+
+# ---------------------------------------------------------------------
+# FASE 2 — GraphSAGE heterogéneo
+# ---------------------------------------------------------------------
+graph:
+  hidden_dim: 64       
+  dropout: 0.3
+  learning_rate: 0.005
+  weight_decay: 5.0e-4
+  max_epochs: 300
+  patience: 40
+  aggregation: "mean"
+# ---------------------------------------------------------------------
+# FASE 3 — Híbrido (stacking)
+# ---------------------------------------------------------------------
+hybrid:
+  embedding_layer: "post_conv2"   # embedding tras segunda capa GNN
+  xgb_tune_trials: 50
+
+# ---------------------------------------------------------------------
+# Evaluación
+# ---------------------------------------------------------------------
+eval:
+  top_n_investigation: 30
+  operational_threshold: 0.30    # threshold "alta captura" para reportes
+  fbeta: 1.0                     # beta para selección de threshold; <1 prioriza precisión (menos FP)
+
+# ---------------------------------------------------------------------
+# Montecarlo
+# ---------------------------------------------------------------------
+montecarlo:
+  n_seeds: 15
+  seed_base: 2025
+  # Opcional: si defines `seeds`, se ignora n_seeds/seed_base
+  # seeds: [2025, 42, 7]
