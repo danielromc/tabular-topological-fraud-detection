@@ -1,4 +1,4 @@
-# Refactor del pipeline — Cómo usarlo
+# Pipeline - ¿Cómo usarlo?
 
 ## Estructura tras el refactor
 
@@ -30,7 +30,7 @@ Test 2/
 └── artifacts_comparison/ ← comparación final
 ```
 
-## Cómo ejecutar
+## ¿Cómo ejecutar?
 
 **Abrir la terminal** en la carpeta del proyecto y escribir:
 
@@ -47,10 +47,10 @@ python main.py all
 | `python main.py fase2` | Todo GraphSAGE |
 | `python main.py fase3` | Todo híbrido |
 | `python main.py comparison` | Comparación final |
-| `python main.py all` | Pipeline completo desde cero (~15 min CPU) |
+| `python main.py all` | Pipeline completo desde cero (~5 min CPU) |
 | `python main.py --help` | Ver lista completa |
 
-## Cómo cambiar un parámetro
+## ¿Cómo cambiar un parámetro?
 
 **Ejemplo 1: probar con semilla 42 en vez de 2025.**
 Abrir `config.yaml` y cambiar:
