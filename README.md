@@ -52,7 +52,7 @@ tabular-topological-fraud-detection/
 Estos archivos se generan en el proyecto en R y se incluyen aquí para que el
 pipeline de Python sea reproducible sin pasos intermedios.
 
-[Ir al repositorio en R](https://github.com/danielromc/fraude-semisinteticos-seguros)
+[Ir al repositorio de R](https://github.com/danielromc/fraude-semisinteticos-seguros)
 
 ## Requisitos
 
