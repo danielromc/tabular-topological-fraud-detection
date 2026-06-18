@@ -4,7 +4,7 @@ Repositorio con un flujo híbrido para detección de fraude que combina:
 
 - modelo tabular con XGBoost,
 - modelo topológico con GraphSAGE,
-- y una capa híbrida tipo stacking.
+- una capa híbrida tipo stacking.
 
 El proyecto está pensado para ejecutarse de principio a fin desde `main.py` y se
 configura desde `config.yaml`.
