@@ -1,13 +1,26 @@
-# Pipeline - ¿Cómo usarlo?
+# Pipeline de detección de fraude
 
-## Estructura del flujo de trabajo
+Repositorio con un flujo híbrido para detección de fraude que combina:
+
+- modelo tabular con XGBoost,
+- modelo topológico con GraphSAGE,
+- y una capa híbrida tipo stacking.
+
+El proyecto está pensado para ejecutarse de principio a fin desde `main.py` y se
+configura desde `config.yaml`.
+
+## Estructura del proyecto
 
 ```
-tabular-topológico/
-├── config.yaml          ← TODOS los parámetros
-├── main.py              ← orquestador único
-├── pipeline/            ← módulos de cada fase
-│   ├── __init__.py
+tabular-topological-fraud-detection/
+├── README.md
+├── LICENSE
+├── config.yaml              ← parámetros del pipeline
+├── main.py                  ← orquestador único
+├── claims.csv               ← datos de entrada tabulares
+├── providers.csv            ← datos de entrada de proveedores
+├── edges.csv                ← relaciones para el grafo
+├── pipeline/                ← módulos por fase
 │   ├── prep.py
 │   ├── xgb_baseline.py
 │   ├── xgb_tune.py
@@ -22,63 +35,119 @@ tabular-topológico/
 │   ├── hybrid_tune.py
 │   ├── hybrid_eval.py
 │   └── comparison.py
-│
-├── claims.csv, providers.csv, edges.csv
-├── artifacts/           ← fase 1
-├── artifacts_graph/     ← fase 2
-├── artifacts_hybrid/    ← fase 3
-└── artifacts_comparison/ ← comparación final
+├── scripts/                 ← scripts auxiliares/experimentales
+├── lib/                     ← librerías estáticas de visualización
+├── artifacts/               ← salidas fase tabular
+├── artifacts_graph/         ← salidas fase topológica
+├── artifacts_hybrid/        ← salidas fase híbrida
+└── artifacts_comparison/    ← métricas y figuras finales
 ```
+
+## ¿Qué contiene cada dato?
+
+- `claims.csv`: base principal de reclamaciones para el entrenamiento tabular.
+- `providers.csv`: información auxiliar de proveedores.
+- `edges.csv`: relaciones (aristas) necesarias para construir el grafo.
+
+Estos archivos se generan en el proyecto en R y se incluyen aquí para que el
+pipeline de Python sea reproducible sin pasos intermedios.
+
+## Requisitos
+
+Se recomienda usar la versión más actualziada de Python.
+
+Paquetes principales usados por el proyecto:
+
+- `numpy`
+- `pandas`
+- `scikit-learn`
+- `matplotlib`
+- `joblib`
+- `xgboost`
+- `optuna`
+- `pyyaml`
+- `torch`
+- `torch-geometric`
+- `networkx`
+- `shap`
+- `scipy`
+
 
 ## ¿Cómo ejecutar?
 
-**Abrir la terminal** en la carpeta del proyecto y escribir:
+El punto de entrada es `main.py`.
 
-```
+```bash
 python main.py all
 ```
 
-## Comandos disponibles
+Comandos disponibles:
 
 | comando | qué hace |
 |---|---|
-| `python main.py prep`  | Solo preparación |
-| `python main.py fase1` | Todo XGBoost (prep → baseline → tune → eval → top) |
-| `python main.py fase2` | Todo GraphSAGE |
-| `python main.py fase3` | Todo híbrido |
-| `python main.py comparison` | Comparación final |
-| `python main.py all` | Pipeline completo desde cero (~5 min CPU) |
-| `python main.py --help` | Ver lista completa |
+| `python main.py prep` | Preparación de features y splits |
+| `python main.py fase1` | XGBoost completo (prep → baseline → tune → eval → top) |
+| `python main.py fase2` | GraphSAGE completo |
+| `python main.py fase3` | Flujo híbrido completo |
+| `python main.py comparison` | Comparación final entre modelos |
+| `python main.py all` | Pipeline completo desde cero |
+| `python main.py --help` | Ver todas las opciones |
 
-## ¿Cómo cambiar un parámetro?
+## Flujo de trabajo
 
-**Ejemplo 1: probar con semilla 42 en vez de 2025.**
-Abrir `config.yaml` y cambiar:
+### Fase 1: tabular
+
+- limpieza y preparación de datos,
+- entrenamiento baseline con XGBoost,
+- ajuste de hiperparámetros,
+- evaluación en test,
+- ranking top-30 para investigación.
+
+### Fase 2: topológica
+
+- inspección del grafo,
+- construcción de `HeteroData`,
+- entrenamiento de GraphSAGE,
+- evaluación en test.
+
+### Fase 3: híbrida
+
+- extracción de embeddings,
+- baseline híbrido,
+- tuning híbrido,
+- evaluación híbrida final.
+
+### Comparación final
+
+- tabla maestra de métricas,
+- curvas PR y ROC,
+- matrices de confusión,
+- importancias de variables,
+- análisis por subtipo.
+
+## Configuración
+
+Toda la configuración vive en `config.yaml`.
+
+Ejemplo: cambiar la semilla.
+
 ```yaml
 seed: 42
 ```
-Lanzar: `python main.py all`.
 
-**Ejemplo 2: probar GraphSAGE con 128 dims en vez de 64.**
-En `config.yaml`:
+Ejemplo: cambiar la dimensión oculta de GraphSAGE.
+
 ```yaml
 graph:
   hidden_dim: 128
 ```
-Lanzar solo lo afectado:
-```cmd
-python main.py graph_train
-python main.py graph_eval
-python main.py hybrid_extract
-python main.py hybrid_tune
-python main.py hybrid_eval
-python main.py comparison
-```
 
-**Ejemplo 3: duplicar los trials de Optuna.**
-```yaml
-xgb_tune:
-  n_trials: 100
-hybrid:
-  xgb_tune_trials: 100
-```
+Luego ejecutar solo la parte afectada o el pipeline completo.
+
+## Salidas generadas
+
+- `artifacts/`: features, índices de split, métricas tabulares y resultados de XGBoost.
+- `artifacts_graph/`: grafo, checkpoint y métricas de GraphSAGE.
+- `artifacts_hybrid/`: embeddings, modelos e indicadores híbridos.
+- `artifacts_comparison/`: tablas y figuras comparativas finales.
+
