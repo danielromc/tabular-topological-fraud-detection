@@ -1,9 +1,9 @@
 # Pipeline - ¿Cómo usarlo?
 
-## Estructura tras el refactor
+## Estructura del flujo de trabajo
 
 ```
-Test 2/
+tabular-topológico/
 ├── config.yaml          ← TODOS los parámetros
 ├── main.py              ← orquestador único
 ├── pipeline/            ← módulos de cada fase
