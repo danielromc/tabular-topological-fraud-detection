@@ -22,6 +22,7 @@ artifacts_comparison/
 # Generated visual outputs
 *.html
 *.pdf
+*.docx
 
 # Keep source data policy explicit: uncomment if you do NOT want to version raw data
 # claims.csv
